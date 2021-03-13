@@ -268,12 +268,12 @@ SUBROUTINE aed_bio_drag_test(data, column, layer_idx, drag)
    AED_REAL :: K_CD
 !-------------------------------------------------------------------------------
 !BEGIN
-   
+
    ! Hard set the parameters, for now (we'll read in via namelist later)
    veg_height = 0.1
    diameter = 10.
    n_stems = 2.
-   
+
    ! get local macrophyte density
    mphy = zero_ ! _STATE_VAR_S_(data%id_veg) !must be configured in "define"
 
