@@ -9,7 +9,7 @@
 !#                                                                             #
 !#      http://aquatic.science.uwa.edu.au/                                     #
 !#                                                                             #
-!#  Copyright 2015 - 2020 -  The University of Western Australia               #
+!#  Copyright 2015 - 2021 -  The University of Western Australia               #
 !#                                                                             #
 !#   GLM is free software: you can redistribute it and/or modify               #
 !#   it under the terms of the GNU General Public License as published by      #
@@ -100,7 +100,7 @@ SUBROUTINE aed_define_test(data, namlst)
    data%id_tst_act2 = aed_define_sheet_diag_variable("act2",'mmol/m**2','non-zero depth column')
    data%id_tst_act3 = aed_define_sheet_diag_variable("act3",'mmol/m**2','active XOR non-zero depth')
 
-   data%id_sed_zone = aed_locate_global_sheet('sed_zone')
+   data%id_sed_zone = aed_locate_sheet_global('sed_zone')
    data%id_tst_zon_ben = aed_define_sheet_diag_variable("zonID",'num','sed_zone ID of this unit')
    data%id_tst_zon_pel = aed_define_diag_variable("zonLY",'num','sed_zone impacting this water layer')
    data%id_tst_zon_temp = aed_define_diag_variable("ztemp",'-','avg temp of this sedzone region')
