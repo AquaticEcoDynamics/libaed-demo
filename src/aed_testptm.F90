@@ -67,8 +67,6 @@ MODULE aed_testptm
       AED_REAL :: vvel_new, vvel_old, decay_rate_new, decay_rate_old
       AED_REAL :: X_dwww, X_cdw, X_nc, X_pc, mass_limit
 
-      LOGICAL :: extra_diag
-
       CONTAINS
          PROCEDURE :: define             => aed_define_testptm
 !        PROCEDURE :: calculate          => aed_calculate_testptm
@@ -87,7 +85,13 @@ MODULE aed_testptm
    INTEGER, PARAMETER :: PTM_BIRTH  = 17
    INTEGER, PARAMETER :: PTM_AGE    = 18
    INTEGER, PARAMETER :: PTM_STATUS = 19
-   INTEGER :: diag_level = 10
+
+   LOGICAL :: extra_diag = .false.
+   INTEGER :: diag_level = 10                ! 0 = no diagnostic outputs
+                                             ! 1 = basic diagnostic outputs
+                                             ! 2 = flux rates, and supporitng
+                                             ! 3 = other metrics
+                                             !10 = all debug & checking outputs
 
 
 !===============================================================================
@@ -121,10 +125,14 @@ SUBROUTINE aed_define_testptm(data, namlst)
    AED_REAL :: X_nc = 0.1
    AED_REAL :: X_pc = 0.01
    AED_REAL :: X_dwww = 1.0
-   LOGICAL  :: extra_diag = .FALSE.
 
 ! %% From Module Global
-!  INTEGER :: diag_level = 10
+!  LOGICAL :: extra_diag = .FALSE.      !## Obsolete Use diag_level = 10
+!  INTEGER :: diag_level = 10                ! 0 = no diagnostic outputs
+!                                            ! 1 = basic diagnostic outputs
+!                                            ! 2 = flux rates, and supporitng
+!                                            ! 3 = other metrics
+!                                            !10 = all debug & checking outputs
 !  %% END NAMELIST   %%  /aed_testptm/
 
    NAMELIST /aed_testptm/ vvel_new, vvel_old,                 &
@@ -136,12 +144,6 @@ SUBROUTINE aed_define_testptm(data, namlst)
 !BEGIN
 
    ! Initialise
-! Now done at declaration
-!  mass_limit = 10.
-!  X_dwww = 1.0; X_cdw = 0.5;  X_nc = 0.1;  X_pc= 0.01
-!  decay_rate_new = 0.; decay_rate_old = 0.
-!  vvel_new = 0.; vvel_old = 0.
-!  extra_diag = .false.
 
    ! Read the namelist
    read(namlst,nml=aed_testptm,iostat=status)
@@ -149,13 +151,14 @@ SUBROUTINE aed_define_testptm(data, namlst)
 
    print *,"        aed_testptm initialization"
 
+   if ( extra_diag ) diag_level = 10
+
    ! Set module parameters
    data%vvel_new       = vvel_new/secs_per_day
    data%vvel_old       = vvel_old/secs_per_day
    data%decay_rate_new = decay_rate_new/secs_per_day
    data%decay_rate_old = decay_rate_old/secs_per_day
    data%mass_limit     = mass_limit
-   data%extra_diag     = extra_diag
    data%X_dwww         = X_dwww
    data%X_cdw          = X_cdw
    data%X_nc           = X_nc
@@ -173,7 +176,7 @@ SUBROUTINE aed_define_testptm(data, namlst)
    data%id_ptm118 = aed_define_diag_variable('age', 'days', 'last particle age')
 
    ! Junk properties
-   IF( data%extra_diag ) THEN
+   IF( diag_level >= 10 ) THEN
     data%id_ptm_01 = aed_define_diag_variable('tstptm01', '', 'testptm 01')
     data%id_ptm_02 = aed_define_diag_variable('tstptm02', '', 'testptm 02')
     data%id_ptm_03 = aed_define_diag_variable('tstptm03', '', 'testptm 03')
@@ -261,7 +264,7 @@ SUBROUTINE aed_particle_bgc_testptm(data,column,layer_idx,ppid,partcl)
      _DIAG_VAR_(data%id_d_dn)  = zero_
      _DIAG_VAR_(data%id_d_dp)  = zero_
 
-     IF( data%extra_diag ) THEN
+     IF( diag_level >= 10 ) THEN
       _DIAG_VAR_(data%id_ptm_01) = zero_
       _DIAG_VAR_(data%id_ptm_02) = zero_
       _DIAG_VAR_(data%id_ptm_03) = zero_
@@ -333,7 +336,7 @@ SUBROUTINE aed_particle_bgc_testptm(data,column,layer_idx,ppid,partcl)
    _DIAG_VAR_(data%id_ptm_17) = _DIAG_VAR_(data%id_ptm_17) + partcl(PTM_BIRTH)
    _DIAG_VAR_(data%id_ptm_18) = &
                   _DIAG_VAR_(data%id_ptm_18) + (partcl(PTM_AGE)-partcl(PTM_BIRTH)) /secs_per_day
-   IF( data%extra_diag ) THEN
+   IF( diag_level >= 10 ) THEN
     _DIAG_VAR_(data%id_ptm_01) = _DIAG_VAR_(data%id_ptm_01) + partcl(1)
     _DIAG_VAR_(data%id_ptm_02) = _DIAG_VAR_(data%id_ptm_02) + partcl(2)
     _DIAG_VAR_(data%id_ptm_03) = _DIAG_VAR_(data%id_ptm_03) + partcl(3)
@@ -355,7 +358,7 @@ SUBROUTINE aed_particle_bgc_testptm(data,column,layer_idx,ppid,partcl)
    _DIAG_VAR_(data%id_ptm115) = partcl(PTM_MASS)
    _DIAG_VAR_(data%id_ptm117) = partcl(PTM_BIRTH)
    _DIAG_VAR_(data%id_ptm118) = (partcl(PTM_AGE)-partcl(PTM_BIRTH))/secs_per_day
-   IF( data%extra_diag ) THEN
+   IF( diag_level >= 10 ) THEN
     _DIAG_VAR_(data%id_ptm101) = partcl(1)
     _DIAG_VAR_(data%id_ptm102) = partcl(2)
     _DIAG_VAR_(data%id_ptm103) = partcl(3)
