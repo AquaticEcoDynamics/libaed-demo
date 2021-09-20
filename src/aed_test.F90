@@ -159,14 +159,14 @@ SUBROUTINE aed_calculate_riparian_test(data,column,layer_idx, pc_wet)
 !
 !LOCALS
    ! Temporary variables
-   AED_REAL :: ben, lh, matz
+   AED_REAL :: ben, lh, sedz
 !
 !-------------------------------------------------------------------------------
 !BEGIN
    _DIAG_VAR_S_(data%id_tst_act) = pc_wet
 
-   matz = _STATE_VAR_S_(data%id_sed_zone)
-   _DIAG_VAR_(data%id_tst_zon_pel) = matz
+   sedz = _STATE_VAR_S_(data%id_sed_zone)
+   _DIAG_VAR_(data%id_tst_zon_pel) = sedz
 
    lh = _STATE_VAR_(data%id_tst_lh)
    IF (lh > 0.0) THEN
@@ -206,7 +206,7 @@ SUBROUTINE aed_calculate_benthic_test(data,column,layer_idx)
 !
 !LOCALS
    ! Temporary variables
-   AED_REAL :: ben, lh, matz
+   AED_REAL :: ben, lh, sedz
 !
 !-------------------------------------------------------------------------------
 !BEGIN
@@ -214,13 +214,13 @@ SUBROUTINE aed_calculate_benthic_test(data,column,layer_idx)
    ben = 10 - ben
    _FLUX_VAR_B_(data%id_tst_ben) = ben / secs_per_day
 
-   matz = _STATE_VAR_S_(data%id_sed_zone)
-   _DIAG_VAR_S_(data%id_tst_zon_ben) = matz
-   _DIAG_VAR_(data%id_tst_zon_pel) = matz
+   sedz = _STATE_VAR_S_(data%id_sed_zone)
+   _DIAG_VAR_S_(data%id_tst_zon_ben) = sedz
+   _DIAG_VAR_(data%id_tst_zon_pel) = sedz
    _DIAG_VAR_(data%id_tst_zon_temp) = _STATE_VAR_(data%id_tem)
    _DIAG_VAR_(data%id_tst_zon_rad) = _STATE_VAR_(data%id_par)
    !## TEST FLUX VAR TO DIAGNOSE flux_pel beign disaggregated onto non-benthic variables, from sediment zones
-   _FLUX_VAR_(data%id_tst_flux_pel) = 0.01*matz / secs_per_day
+   _FLUX_VAR_(data%id_tst_flux_pel) = 0.01*sedz / secs_per_day
 END SUBROUTINE aed_calculate_benthic_test
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -262,7 +262,7 @@ SUBROUTINE aed_bio_drag_test(data, column, layer_idx, drag)
    AED_REAL,INTENT(inout) :: drag
 !
 !LOCALS
-   AED_REAL :: dz,mphy,matz,vel
+   AED_REAL :: dz,mphy,sedz,vel
    INTEGER  :: mphy_i
    AED_REAL :: veg_height, diameter, n_stems
    AED_REAL :: K_CD
