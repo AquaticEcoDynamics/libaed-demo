@@ -54,8 +54,8 @@ MODULE aed_test
       INTEGER :: id_tst_lh, id_tst_act, id_tst_act2, id_tst_act3
       INTEGER :: id_par, id_nir, id_uva, id_uvb, id_tem
       INTEGER :: id_tst_par, id_tst_nir, id_tst_uva, id_tst_uvb
-      INTEGER :: id_sed_zone !, id_zone_temp, id_zone_rad
-      INTEGER :: id_za_d, id_coln, id_sz_d, id_sedz, id_ca_s, id_ca_c
+      INTEGER :: id_sed_zone, id_sedz
+      INTEGER :: id_coln, id_colid, id_cid_s1, id_cid_s2
 
       CONTAINS
          PROCEDURE :: define             => aed_define_test
@@ -118,10 +118,10 @@ SUBROUTINE aed_define_test(data, namlst)
    data%id_tst_uva = aed_define_diag_variable('tst_uva', '', 'test UVA')
    data%id_tst_uvb = aed_define_diag_variable('tst_uvb', '', 'test UVB')
 
-   data%id_za_d = aed_define_sheet_diag_variable('za_d', 'no units', 'DBG averaged zone', .FALSE.)
-   data%id_sz_d = aed_define_sheet_diag_variable('sz_d', 'no units', 'DBG sed zone', .FALSE.)
-   data%id_ca_s = aed_define_sheet_diag_variable('ca_s', 'no units', 'DBG averaged zone', .FALSE.)
-   data%id_ca_c = aed_define_variable('ca_c', 'no units', 'DBG averaged zone', zero_)
+   data%id_colid = aed_define_diag_variable('colid', 'no units', 'DBG column id diag')
+!#                  aed_define_sheet_diag_variable(name, units, longname, surf, zavg) RESULT(ret)
+   data%id_cid_s1 = aed_define_sheet_diag_variable('cid_s1', 'no units', 'DBG sheet colid NZA', .FALSE., zavg=.FALSE.)
+   data%id_cid_s2 = aed_define_sheet_diag_variable('cid_s2', 'no units', 'DBG sheet colid ZA', .FALSE., zavg=.TRUE.)
 
    data%id_coln = aed_locate_sheet_global('col_num')
    data%id_sedz = aed_locate_sheet_global('sed_zone')
@@ -151,7 +151,7 @@ SUBROUTINE aed_calculate_test(data,column,layer_idx)
    _DIAG_VAR_(data%id_tst_uva) = _STATE_VAR_(data%id_uva)
    _DIAG_VAR_(data%id_tst_uvb) = _STATE_VAR_(data%id_uvb)
 
-   _STATE_VAR_(data%id_ca_c) = _STATE_VAR_S_(data%id_coln)
+   _DIAG_VAR_(data%id_colid) = _STATE_VAR_S_(data%id_coln)
 END SUBROUTINE aed_calculate_test
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -233,9 +233,8 @@ SUBROUTINE aed_calculate_benthic_test(data,column,layer_idx)
    !## TEST FLUX VAR TO DIAGNOSE flux_pel beign disaggregated onto non-benthic variables, from sediment zones
    _FLUX_VAR_(data%id_tst_flux_pel) = 0.01*sedz / secs_per_day
 
-   _DIAG_VAR_S_(data%id_za_d) = _STATE_VAR_S_(data%id_coln)
-   _DIAG_VAR_S_(data%id_sz_d) = _STATE_VAR_S_(data%id_sedz)
-   _DIAG_VAR_S_(data%id_ca_s) = _STATE_VAR_(data%id_ca_c)
+   _DIAG_VAR_S_(data%id_cid_s1) = _DIAG_VAR_(data%id_colid)
+   _DIAG_VAR_S_(data%id_cid_s2) = _DIAG_VAR_(data%id_colid)
 END SUBROUTINE aed_calculate_benthic_test
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
