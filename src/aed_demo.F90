@@ -48,7 +48,7 @@ MODULE aed_demo
 
    PRIVATE   !# By default make everything private
 
-   PUBLIC aed_new_dmo_model, aed_print_version_dmo
+   PUBLIC aed_new_dmo_model, aed_print_dmo_version
 
    !#---------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ END FUNCTION aed_new_dmo_model
 
 
 !###############################################################################
-SUBROUTINE aed_print_version_dmo
+SUBROUTINE aed_print_dmo_version
 !-------------------------------------------------------------------------------
 !BEGIN
    print*,"    libaed-demo version ", TRIM(AED_VERSION)
@@ -106,7 +106,7 @@ SUBROUTINE aed_print_version_dmo
 #  endif
 # endif
 #endif
-END SUBROUTINE aed_print_version_dmo
+END SUBROUTINE aed_print_dmo_version
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 !===============================================================================
