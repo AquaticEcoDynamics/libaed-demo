@@ -55,7 +55,7 @@ MODULE aed_test
       INTEGER :: id_par, id_nir, id_uva, id_uvb, id_tem
       INTEGER :: id_tst_par, id_tst_nir, id_tst_uva, id_tst_uvb
       INTEGER :: id_sed_zone, id_sedz
-      INTEGER :: id_coln, id_colid, id_cid_s1, id_cid_s2
+      INTEGER :: id_coln, id_colid, id_cid_s1, id_cid_s2, id_fsedza
 
       CONTAINS
          PROCEDURE :: define             => aed_define_test
@@ -83,7 +83,7 @@ SUBROUTINE aed_define_test(data, namlst)
 ! Initialise the AED model
 !
 !  Here, the aed namelist is read and the variables exported
-!  by the model are registered with AED2.
+!  by the model are registered with AED
 !-------------------------------------------------------------------------------
 !ARGUMENTS
    INTEGER,INTENT(in) :: namlst
@@ -93,6 +93,8 @@ SUBROUTINE aed_define_test(data, namlst)
 !
 !-------------------------------------------------------------------------------
 !BEGIN
+   print *,"        aed_test configuration"
+
    data%id_tst_lh = aed_locate_global('layer_ht')
    data%id_tst_pel = aed_define_variable("pel",'mmol/m**3','test_pel', zero_)
    data%id_tst_flux_pel = aed_define_variable("pel_bflux",'mmol/m**3','pelagic variable getting fluxed to from a zone', 0.0001)
@@ -122,6 +124,8 @@ SUBROUTINE aed_define_test(data, namlst)
 !#                  aed_define_sheet_diag_variable(name, units, longname, surf, zavg) RESULT(ret)
    data%id_cid_s1 = aed_define_sheet_diag_variable('cid_s1', 'no units', 'DBG sheet colid NZA', .FALSE., zavg=.FALSE.)
    data%id_cid_s2 = aed_define_sheet_diag_variable('cid_s2', 'no units', 'DBG sheet colid ZA', .FALSE., zavg=.TRUE.)
+
+   data%id_fsedza = aed_locate_sheet_variable('SDF_Fsed_poc',update_from_zone=.TRUE.)
 
    data%id_coln = aed_locate_sheet_global('col_num')
    data%id_sedz = aed_locate_sheet_global('sed_zone')
