@@ -121,14 +121,13 @@ SUBROUTINE aed_define_test(data, namlst)
    data%id_tst_uvb = aed_define_diag_variable('tst_uvb', '', 'test UVB')
 
    data%id_colid = aed_define_diag_variable('colid', 'no units', 'DBG column id diag')
-!#                  aed_define_sheet_diag_variable(name, units, longname, surf, zavg) RESULT(ret)
    data%id_cid_s1 = aed_define_sheet_diag_variable('cid_s1', 'no units', 'DBG sheet colid NZA', .FALSE., zavg=.FALSE.)
    data%id_cid_s2 = aed_define_sheet_diag_variable('cid_s2', 'no units', 'DBG sheet colid ZA', .FALSE., zavg=.TRUE.)
 
-   data%id_fsedza = aed_locate_sheet_variable('SDF_Fsed_poc',update_from_zone=.TRUE.)
+!  data%id_fsedza = aed_locate_sheet_variable('SDF_Fsed_poc',update_from_zone=.TRUE.)
 
-   data%id_coln = aed_locate_sheet_global('col_num')
-   data%id_sedz = aed_locate_sheet_global('sed_zone')
+!  data%id_coln = aed_locate_sheet_global('col_num')
+!  data%id_sedz = aed_locate_sheet_global('sed_zones')
 END SUBROUTINE aed_define_test
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
