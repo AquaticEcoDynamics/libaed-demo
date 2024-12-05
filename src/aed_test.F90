@@ -126,8 +126,8 @@ SUBROUTINE aed_define_test(data, namlst)
 
 !  data%id_fsedza = aed_locate_sheet_variable('SDF_Fsed_poc',update_from_zone=.TRUE.)
 
-!  data%id_coln = aed_locate_sheet_global('col_num')
-!  data%id_sedz = aed_locate_sheet_global('sed_zones')
+   data%id_coln = aed_locate_sheet_global('col_num', nr=.true.)
+!  data%id_sedz = aed_locate_global('sed_zones', nr=.true.)
 END SUBROUTINE aed_define_test
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -154,7 +154,8 @@ SUBROUTINE aed_calculate_test(data,column,layer_idx)
    _DIAG_VAR_(data%id_tst_uva) = _STATE_VAR_(data%id_uva)
    _DIAG_VAR_(data%id_tst_uvb) = _STATE_VAR_(data%id_uvb)
 
-   _DIAG_VAR_(data%id_colid) = _STATE_VAR_S_(data%id_coln)
+   IF ( data%id_coln >= 1 )    &
+       _DIAG_VAR_(data%id_colid) = _STATE_VAR_S_(data%id_coln)
 END SUBROUTINE aed_calculate_test
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
