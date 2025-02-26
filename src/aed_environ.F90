@@ -134,13 +134,13 @@ SUBROUTINE aed_define_environ(data, namlst)
          print*,"extern var :", tvar%name,tvar%index,tvar%units,tvar%longname
          IF ( tvar%sheet ) THEN
            data%n_ev_s = data%n_ev_s + 1
-           data%id_d_env_s(data%n_ev_s) = tvar%index
+           data%id_env_s(data%n_ev_s) = aed_locate_sheet_global(tvar%name)
            data%id_d_env_s(data%n_ev_s) =                                      &
                           aed_define_sheet_diag_variable(tvar%name,tvar%units, &
                                                tvar%longname,tvar%top,tvar%zavg)
          ELSE
            data%n_ev = data%n_ev + 1
-           data%id_env(data%n_ev) = tvar%index
+           data%id_env(data%n_ev) = aed_locate_global(tvar%name)
            data%id_d_env(data%n_ev) = aed_define_diag_variable(tvar%name,      &
                                                       tvar%units, tvar%longname)
          ENDIF
