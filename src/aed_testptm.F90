@@ -232,18 +232,19 @@ END SUBROUTINE aed_define_testptm
 
 
 !###############################################################################
-SUBROUTINE aed_particle_bgc_testptm(data,column,layer_idx,ppid,partcl)
+SUBROUTINE aed_particle_bgc_testptm(data,column,layer_idx,ppid,p)
 !ARGUMENTS
    CLASS (aed_testptm_data_t),INTENT(in) :: data
    TYPE (aed_column_t),INTENT(inout) :: column(:)
    INTEGER,INTENT(in) :: layer_idx
    INTEGER,INTENT(inout) :: ppid
-   AED_REAL,DIMENSION(:),INTENT(inout) :: partcl
+   TYPE (aed_ptm_t),INTENT(inout) :: p
 !
 !LOCALS
    INTEGER :: n
    AED_REAL :: oxy_flux
    AED_REAL :: decay, area, thickness
+   AED_REAL,DIMENSION(100) :: partcl
 
    AED_REAL, PARAMETER :: buoyancy_age = 86400.
    AED_REAL, PARAMETER :: DT           = 15.*60.
