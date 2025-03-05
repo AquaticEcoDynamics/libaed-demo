@@ -40,6 +40,7 @@ MODULE aed_demo
 
    USE aed_test
    USE aed_testptm
+   USE aed_environ
 !  USE aed_dummy
 
    IMPLICIT NONE
@@ -74,6 +75,7 @@ FUNCTION aed_new_dmo_model(modelname) RESULT(model)
 !     CASE ('aed_dummy');          prefix = 'DUM'; ALLOCATE(aed2_dummy_data_t::model)
       CASE ('aed_test');           prefix = 'TST'; ALLOCATE(aed_test_data_t::model)
       CASE ('aed_testptm');        prefix = 'TPT'; ALLOCATE(aed_testptm_data_t::model)
+      CASE ('aed_environ');        prefix = 'ENV'; ALLOCATE(aed_environ_data_t::model)
    END SELECT
 
    IF (ASSOCIATED(model)) THEN
