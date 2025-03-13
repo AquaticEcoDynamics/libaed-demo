@@ -90,19 +90,11 @@ SUBROUTINE aed_define_environ(data, namlst)
    CLASS (aed_environ_data_t),INTENT(inout) :: data
 !
 !LOCALS
-   INTEGER :: ev
+   INTEGER :: ev, status
    TYPE(aed_variable_t),POINTER :: tvar
 
-!  %% NAMELIST   %%  /aed_testptm/
-!  AED_REAL :: vvel_new = 0.
-!  AED_REAL :: vvel_old = 0.
-!  AED_REAL :: decay_rate_new = 0.
-!  AED_REAL :: decay_rate_old = 0.
-!  AED_REAL :: mass_limit = 10.
-!  AED_REAL :: X_cdw = 0.5
-!  AED_REAL :: X_nc = 0.1
-!  AED_REAL :: X_pc = 0.01
-!  AED_REAL :: X_dwww = 1.0
+!  %% NAMELIST   %%  /aed_environ/
+   CHARACTER(len=64) :: environs(64)
 
 ! %% From Module Global
 !  INTEGER :: diag_level = 10                ! 0 = no diagnostic outputs
@@ -110,43 +102,52 @@ SUBROUTINE aed_define_environ(data, namlst)
 !                                            ! 2 = flux rates, and supporitng
 !                                            ! 3 = other metrics
 !                                            !10 = all debug & checking outputs
-!  %% END NAMELIST   %%  /aed_testptm/
+!  %% END NAMELIST   %%  /aed_environ/
 
-!  NAMELIST /aed_environ/ vvel_new, vvel_old,                 &
-!                         decay_rate_new, decay_rate_old,     &
-!                         mass_limit, extra_diag, diag_level, &
-!                         X_dwww, X_cdw, X_nc, X_pc
+   NAMELIST /aed_environ/ environs, diag_level
 
 !
 !-------------------------------------------------------------------------------
 !BEGIN
    print *,"        aed_environ configuration"
 
-!  ! Read the namelist
-!  read(namlst,nml=aed_testptm,iostat=status)
-!  IF (status /= 0) STOP 'Error reading namelist aed_testptm'
-
    data%n_ev = 0 ; data%n_ev_s = 0
-   ev = 1
-   DO WHILE (aed_get_var(ev, tvar))
+
+!  ! Read the namelist
+   environs = ''
+   READ(namlst, nml=aed_environ, iostat=status)
+   IF ( status /= 0 ) THEN
+      REWIND(namlst)
+      print*,"Cannot read namelist entry aed_environ"
+      print*,"defaulting to the full list"
+
+      ev = 1
+      DO WHILE (aed_get_var(ev, tvar))
          print*,"var :", tvar%name,tvar%index,tvar%units,tvar%longname,tvar%extern
-      IF ( tvar%extern ) THEN
-         print*,"extern var :", tvar%name,tvar%index,tvar%units,tvar%longname
-         IF ( tvar%sheet ) THEN
-           data%n_ev_s = data%n_ev_s + 1
-           data%id_env_s(data%n_ev_s) = aed_locate_sheet_global(tvar%name)
-           data%id_d_env_s(data%n_ev_s) =                                      &
+         IF ( tvar%extern ) THEN
+            print*,"extern var :", tvar%name,tvar%index,tvar%units,tvar%longname
+            IF ( tvar%sheet ) THEN
+              data%n_ev_s = data%n_ev_s + 1
+              data%id_env_s(data%n_ev_s) = aed_locate_sheet_global(tvar%name)
+              data%id_d_env_s(data%n_ev_s) =                                   &
                           aed_define_sheet_diag_variable(tvar%name,tvar%units, &
                                                tvar%longname,tvar%top,tvar%zavg)
-         ELSE
-           data%n_ev = data%n_ev + 1
-           data%id_env(data%n_ev) = aed_locate_global(tvar%name)
-           data%id_d_env(data%n_ev) = aed_define_diag_variable(tvar%name,      &
+            ELSE
+              data%n_ev = data%n_ev + 1
+              data%id_env(data%n_ev) = aed_locate_global(tvar%name)
+              data%id_d_env(data%n_ev) = aed_define_diag_variable(tvar%name,   &
                                                       tvar%units, tvar%longname)
+            ENDIF
          ENDIF
-      ENDIF
-      ev = ev + 1
-   ENDDO
+         ev = ev + 1
+      ENDDO
+   ELSE
+      DO ev=1,size(environs)
+         IF ( environs(ev) == '' ) EXIT
+         data%n_ev = data%n_ev + 1
+         data%id_env(data%n_ev) = aed_locate_global(environs(ev))
+      ENDDO
+   ENDIF
 END SUBROUTINE aed_define_environ
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
