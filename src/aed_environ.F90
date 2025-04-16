@@ -86,15 +86,18 @@ SUBROUTINE aed_define_environ(data, namlst)
 !  by the model are registered with AED
 !-------------------------------------------------------------------------------
 !ARGUMENTS
-   INTEGER,INTENT(in) :: namlst
    CLASS (aed_environ_data_t),INTENT(inout) :: data
+   INTEGER,INTENT(in) :: namlst
 !
 !LOCALS
    INTEGER :: ev, status
-   TYPE(aed_variable_t),POINTER :: tvar
 
 !  %% NAMELIST   %%  /aed_environ/
-   CHARACTER(len=64) :: environs(64)
+   INTEGER :: n_environs = -1
+   CHARACTER(len=64) :: environs(32)
+
+   INTEGER :: n_sheet_environs = -1
+   CHARACTER(len=64) :: sheet_environs(32)
 
 ! %% From Module Global
 !  INTEGER :: diag_level = 10                ! 0 = no diagnostic outputs
@@ -104,7 +107,9 @@ SUBROUTINE aed_define_environ(data, namlst)
 !                                            !10 = all debug & checking outputs
 !  %% END NAMELIST   %%  /aed_environ/
 
-   NAMELIST /aed_environ/ environs, diag_level
+   NAMELIST /aed_environ/ n_environs, environs,             &
+                          n_sheet_environs, sheet_environs, &
+                          diag_level
 
 !
 !-------------------------------------------------------------------------------
@@ -116,38 +121,24 @@ SUBROUTINE aed_define_environ(data, namlst)
 !  ! Read the namelist
    environs = ''
    READ(namlst, nml=aed_environ, iostat=status)
-   IF ( status /= 0 ) THEN
-      REWIND(namlst)
-      print*,"Cannot read namelist entry aed_environ"
-      print*,"defaulting to the full list"
+   IF ( status /= 0 ) STOP "Cannot read namelist entry aed_environ"
 
-      ev = 1
-      DO WHILE (aed_get_var(ev, tvar))
-         print*,"var :", tvar%name,tvar%index,tvar%units,tvar%longname,tvar%extern
-         IF ( tvar%extern ) THEN
-            print*,"extern var :", tvar%name,tvar%index,tvar%units,tvar%longname
-            IF ( tvar%sheet ) THEN
-              data%n_ev_s = data%n_ev_s + 1
-              data%id_env_s(data%n_ev_s) = aed_locate_sheet_global(tvar%name)
-              data%id_d_env_s(data%n_ev_s) =                                   &
-                          aed_define_sheet_diag_variable(tvar%name,tvar%units, &
-                                               tvar%longname,tvar%top,tvar%zavg)
-            ELSE
-              data%n_ev = data%n_ev + 1
-              data%id_env(data%n_ev) = aed_locate_global(tvar%name)
-              data%id_d_env(data%n_ev) = aed_define_diag_variable(tvar%name,   &
-                                                      tvar%units, tvar%longname)
-            ENDIF
-         ENDIF
-         ev = ev + 1
-      ENDDO
-   ELSE
-      DO ev=1,size(environs)
-         IF ( environs(ev) == '' ) EXIT
-         data%n_ev = data%n_ev + 1
-         data%id_env(data%n_ev) = aed_locate_global(environs(ev))
-      ENDDO
-   ENDIF
+   DO ev=1,n_environs
+      IF ( environs(ev) == '' ) EXIT
+      data%n_ev = data%n_ev + 1
+      data%id_env(data%n_ev) = aed_locate_global(environs(ev))
+      data%id_d_env(data%n_ev) = aed_define_diag_variable(environs(ev),'',    &
+                                                                  environs(ev))
+   ENDDO
+
+   DO ev=1,n_sheet_environs
+      IF ( sheet_environs(ev) == '' ) EXIT
+      data%n_ev_s = data%n_ev_s + 1
+      data%id_env_s(data%n_ev_s) = aed_locate_sheet_global(sheet_environs(ev))
+      data%id_d_env_s(data%n_ev_s) =                                          &
+                  aed_define_sheet_diag_variable(sheet_environs(ev), '',      &
+                                                            sheet_environs(ev))
+   ENDDO
 END SUBROUTINE aed_define_environ
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -162,11 +153,16 @@ SUBROUTINE aed_calculate_environ(data,column,layer_idx)
 !
 !LOCALS
    INTEGER :: ev
+   TYPE(aed_variable_t),POINTER :: tvar
 !
 !-------------------------------------------------------------------------------
 !BEGIN
    DO ev=1,data%n_ev
-     _DIAG_VAR_(data%id_d_env(ev)) = _STATE_VAR_(data%id_env(ev))
+     IF (data%id_env(ev) > 0) THEN
+        _DIAG_VAR_(data%id_d_env(ev)) = _STATE_VAR_(data%id_env(ev))
+     ELSE
+        _DIAG_VAR_(data%id_d_env(ev)) = MISVAL
+     ENDIF
    ENDDO
 END SUBROUTINE aed_calculate_environ
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -190,7 +186,11 @@ SUBROUTINE aed_calculate_riparian_environ(data,column,layer_idx, pc_wet)
 !-------------------------------------------------------------------------------
 !BEGIN
    DO ev=1,data%n_ev_s
-      _DIAG_VAR_S_(data%id_d_env_s(ev)) = _STATE_VAR_S_(data%id_env_s(ev))
+     IF (data%id_env_s(ev) > 0) THEN
+        _DIAG_VAR_S_(data%id_d_env_s(ev)) = _STATE_VAR_S_(data%id_env_s(ev))
+     ELSE
+        _DIAG_VAR_S_(data%id_d_env_s(ev)) = MISVAL
+     ENDIF
    ENDDO
 END SUBROUTINE aed_calculate_riparian_environ
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -213,7 +213,11 @@ SUBROUTINE aed_calculate_benthic_environ(data,column,layer_idx)
 !-------------------------------------------------------------------------------
 !BEGIN
    DO ev=1,data%n_ev_s
-      _DIAG_VAR_S_(data%id_d_env_s(ev)) = _STATE_VAR_S_(data%id_env_s(ev))
+     IF (data%id_env_s(ev) > 0) THEN
+        _DIAG_VAR_S_(data%id_d_env_s(ev)) = _STATE_VAR_S_(data%id_env_s(ev))
+     ELSE
+        _DIAG_VAR_S_(data%id_d_env_s(ev)) = MISVAL
+     ENDIF
    END DO
 END SUBROUTINE aed_calculate_benthic_environ
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
