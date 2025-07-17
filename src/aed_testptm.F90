@@ -254,6 +254,8 @@ SUBROUTINE aed_particle_bgc_testptm(data,column,layer_idx,ppid,p)
 !-------------------------------------------------------------------------------
 !BEGIN
 
+   partcl = 0.
+
    ! Check if we are in a new cell, to reset cumulative counters
    IF (ppid == 0) THEN
      _DIAG_VAR_(data%id_ptm_14) = zero_

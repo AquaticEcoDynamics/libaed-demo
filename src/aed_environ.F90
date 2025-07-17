@@ -218,7 +218,7 @@ SUBROUTINE aed_calculate_benthic_environ(data,column,layer_idx)
      ELSE
         _DIAG_VAR_S_(data%id_d_env_s(ev)) = MISVAL
      ENDIF
-   END DO
+   ENDDO
 END SUBROUTINE aed_calculate_benthic_environ
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
