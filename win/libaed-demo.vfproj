@@ -26,7 +26,7 @@
 			<Tool Name="VFPostBuildEventTool"/>
 		</Configuration>
 		<Configuration Name="Debug|x64" UseCompiler="ifortCompiler" OutputDirectory="$(SolutionDir)\$(PlatformName)-$(ConfigurationName)" IntermediateDirectory="$(SolutionDir)\$(PlatformName)-$(ConfigurationName)\$(ProjectName)" ConfigurationType="typeStaticLibrary">
-			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/Qdiag-disable:10448" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\src\;..\include\;.\$(PlatformName)-$(ConfigurationName)\;..\..\libaed-water\include\" F2003Semantics="true" WarnInterfaces="true" RealKIND="realKIND8" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\src\;..\include\;.\$(PlatformName)-$(ConfigurationName)\;..\..\libaed-water\include\" F2003Semantics="true" WarnInterfaces="true" RealKIND="realKIND8" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 			<Tool Name="VFLibrarianTool"/>
 			<Tool Name="VFResourceCompilerTool"/>
 			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -35,8 +35,8 @@
 			<Tool Name="VFPreBuildEventTool"/>
 			<Tool Name="VFPostBuildEventTool"/>
 		</Configuration>
-		<Configuration Name="Release|x64" UseCompiler="ifortCompiler" OutputDirectory="$(SolutionDir)\$(PlatformName)-$(ConfigurationName)" IntermediateDirectory="$(SolutionDir)\$(PlatformName)-$(ConfigurationName)\$(ProjectName)" ConfigurationType="typeStaticLibrary">
-			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/Qdiag-disable:10448" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\src\;..\include\;.\$(PlatformName)-$(ConfigurationName)\;..\..\libaed-water\include\" F2003Semantics="true" RealKIND="realKIND8"/>
+		<Configuration Name="Release|x64" UseCompiler="ifxCompiler" OutputDirectory="$(SolutionDir)\$(PlatformName)-$(ConfigurationName)" IntermediateDirectory="$(SolutionDir)\$(PlatformName)-$(ConfigurationName)\$(ProjectName)" ConfigurationType="typeStaticLibrary">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\src\;..\include\;.\$(PlatformName)-$(ConfigurationName)\;..\..\libaed-water\include\" F2003Semantics="true" RealKIND="realKIND8"/>
 			<Tool Name="VFLibrarianTool"/>
 			<Tool Name="VFResourceCompilerTool"/>
 			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -50,10 +50,11 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath="..\src\aed_demo.F90"/>
-		<File RelativePath="..\src\aed_environ.F90"/>
-		<File RelativePath="..\src\aed_test.F90"/>
-		<File RelativePath="..\src\aed_testptm.F90"/></Filter>
+			<File RelativePath="..\src\aed_demo.F90"/>
+			<File RelativePath="..\src\aed_environ.F90"/>
+			<File RelativePath="..\src\aed_test.F90"/>
+			<File RelativePath="..\src\aed_testptm.F90"/>
+		</Filter>
 	</Files>
 	<Globals/>
 </VisualStudioProject>
