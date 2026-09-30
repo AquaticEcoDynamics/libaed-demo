@@ -88,6 +88,8 @@ MODULE aed_testptm
 
    LOGICAL :: extra_diag = .false.
    INTEGER :: diag_level = 10                ! 0 = no diagnostic outputs
+   !# 2026-08-29: see the WARNING in aed_particle_bgc_testptm - this module is a stub.
+   LOGICAL :: stub_warning_issued = .FALSE.
                                              ! 1 = basic diagnostic outputs
                                              ! 2 = flux rates, and supporitng
                                              ! 3 = other metrics
@@ -253,6 +255,23 @@ SUBROUTINE aed_particle_bgc_testptm(data,column,layer_idx,ppid,p)
 !
 !-------------------------------------------------------------------------------
 !BEGIN
+
+   !###########################################################################
+   !# 2026-08-29 WARNING - THIS ROUTINE IS A NON-FUNCTIONAL STUB.
+   !#   The particle array `p(:)` passed in by the host is never referenced. Every
+   !#   calculation below runs off the LOCAL array `partcl`, which is zeroed on the next
+   !#   line, so: decay == 0, oxy_flux == 0, every _FLUX_VAR_ contribution == 0, every
+   !#   ptm_* diagnostic == 0, and `partcl(PTM_STATUS) = -1` writes to a local that is
+   !#   discarded - so particles are never marked dead either. Wiring it up means reading
+   !#   and writing p(n) for the particles in this cell; that is deliberately NOT invented
+   !#   here. Until then the module produces zeros, loudly.
+   !###########################################################################
+   IF ( .NOT. stub_warning_issued ) THEN
+      print *,"*** WARNING: aed_testptm is a non-functional stub - aed_particle_bgc_testptm"
+      print *,"***          ignores the particle array p(:) and computes from a zeroed local."
+      print *,"***          All of its fluxes and diagnostics will be zero."
+      stub_warning_issued = .TRUE.
+   ENDIF
 
    partcl = 0.
 
