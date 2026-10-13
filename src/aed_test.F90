@@ -56,6 +56,8 @@ MODULE aed_test
       INTEGER :: id_tst_par, id_tst_nir, id_tst_uva, id_tst_uvb
       INTEGER :: id_sed_zone, id_sedz
       INTEGER :: id_coln, id_colid, id_cid_s1, id_cid_s2, id_fsedza
+      INTEGER :: id_tst_upw, id_tst_upb, id_tst_upf   ! water <-> zone exchange probe
+      AED_REAL :: k_up = 0.5, r_up = 0.1                ! uptake velocity (m/d), release rate (/d)
 
       CONTAINS
          PROCEDURE :: define             => aed_define_test
@@ -90,15 +92,30 @@ SUBROUTINE aed_define_test(data, namlst)
    CLASS (aed_test_data_t),INTENT(inout) :: data
 !
 !LOCALS
+   INTEGER  :: status
+   AED_REAL :: k_up = 0.5, r_up = 0.1, upw_initial = 100.
+   NAMELIST /aed_test/ k_up, r_up, upw_initial
 !
 !-------------------------------------------------------------------------------
 !BEGIN
    print *,"        aed_test configuration"
+   !# optional: the exchange probe's rates (defaults when there is no &aed_test block)
+   read(namlst,nml=aed_test,iostat=status)
+   !# not found: the failed read left the file at its end; rewind so the modules
+   !# after this one still find their namelists
+   IF (status /= 0) REWIND(namlst)
+   data%k_up = k_up ; data%r_up = r_up
 
    data%id_tst_lh = aed_locate_global('layer_ht')
    data%id_tst_pel = aed_define_variable("pel",'mmol/m**3','test_pel', zero_)
    data%id_tst_flux_pel = aed_define_variable("pel_bflux",'mmol/m**3','pelagic variable getting fluxed to from a zone', 0.0001)
    data%id_tst_ben = aed_define_sheet_variable("ben",'mmol/m**2','test_ben', zero_)
+   !# Exchange probe (spec 5.2, 10.2 I2): the zone takes up the water variable upw at
+   !# k x (its view of upw) and returns r x upb, per m2 of wetted bed. Water + zone
+   !# inventory (sum V upw + sum_j W_j upb_j) must stay constant.
+   data%id_tst_upw = aed_define_variable("upw",'mmol/m**3','exchange probe, water side', upw_initial, minimum=zero_)
+   data%id_tst_upb = aed_define_sheet_variable("upb",'mmol/m**2','exchange probe, zone side', zero_, minimum=zero_)
+   data%id_tst_upf = aed_define_sheet_diag_variable("up_flux",'mmol/m**2/d','exchange probe, net flux water -> zone')
    data%id_tst_act = aed_define_sheet_diag_variable("act",'mmol/m**2','active column')
    data%id_tst_act2 = aed_define_sheet_diag_variable("act2",'mmol/m**2','non-zero depth column')
    data%id_tst_act3 = aed_define_sheet_diag_variable("act3",'mmol/m**2','active XOR non-zero depth')
@@ -174,7 +191,7 @@ SUBROUTINE aed_calculate_riparian_test(data,column,layer_idx, pc_wet)
 !
 !LOCALS
    ! Temporary variables
-   AED_REAL :: ben, lh, sedz
+   AED_REAL :: ben, lh, sedz, up
 !
 !-------------------------------------------------------------------------------
 !BEGIN
@@ -221,7 +238,7 @@ SUBROUTINE aed_calculate_benthic_test(data,column,layer_idx)
 !
 !LOCALS
    ! Temporary variables
-   AED_REAL :: ben, lh, sedz
+   AED_REAL :: ben, lh, sedz, up
 !
 !-------------------------------------------------------------------------------
 !BEGIN
@@ -236,6 +253,12 @@ SUBROUTINE aed_calculate_benthic_test(data,column,layer_idx)
    _DIAG_VAR_(data%id_tst_zon_rad) = _STATE_VAR_(data%id_par)
    !## TEST FLUX VAR TO DIAGNOSE flux_pel beign disaggregated onto non-benthic variables, from sediment zones
    _FLUX_VAR_(data%id_tst_flux_pel) = 0.01*sedz / secs_per_day
+
+   !# exchange probe: uptake k_up (m/day) x the zone's view of upw, release r_up (/day) x upb
+   up = ( data%k_up * MAX(zero_, _STATE_VAR_(data%id_tst_upw)) - data%r_up * MAX(zero_, _STATE_VAR_S_(data%id_tst_upb)) ) / secs_per_day
+   _FLUX_VAR_(data%id_tst_upw)   = _FLUX_VAR_(data%id_tst_upw) - up
+   _FLUX_VAR_B_(data%id_tst_upb) = _FLUX_VAR_B_(data%id_tst_upb) + up
+   _DIAG_VAR_S_(data%id_tst_upf) = up * secs_per_day
 
    _DIAG_VAR_S_(data%id_cid_s1) = _DIAG_VAR_(data%id_colid)
    _DIAG_VAR_S_(data%id_cid_s2) = _DIAG_VAR_(data%id_colid)
