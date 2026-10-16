@@ -119,11 +119,16 @@ SUBROUTINE aed_define_environ(data, namlst)
    data%n_ev = 0 ; data%n_ev_s = 0
 
 !  ! Read the namelist
-   environs = ''
+   !# 2026-08-29 FIX: sheet_environs was not pre-blanked, so the '' terminator test in the
+   !#   second loop below read undefined storage whenever the namelist supplied fewer than
+   !#   n_sheet_environs entries (or omitted sheet_environs entirely).
+   environs = '' ; sheet_environs = ''
    READ(namlst, nml=aed_environ, iostat=status)
    IF ( status /= 0 ) STOP "Cannot read namelist entry aed_environ"
 
-   DO ev=1,n_environs
+   !# 2026-08-29 FIX: n_environs comes straight from the namelist and was never checked
+   !#   against the declared size of environs(32).
+   DO ev=1,MIN(n_environs,SIZE(environs))
       IF ( environs(ev) == '' ) EXIT
       data%n_ev = data%n_ev + 1
       data%id_env(data%n_ev) = aed_locate_global(environs(ev))
@@ -131,7 +136,8 @@ SUBROUTINE aed_define_environ(data, namlst)
                                                                   environs(ev))
    ENDDO
 
-   DO ev=1,n_sheet_environs
+   !# 2026-08-29 FIX: bound by the declared size of sheet_environs(32) - see above.
+   DO ev=1,MIN(n_sheet_environs,SIZE(sheet_environs))
       IF ( sheet_environs(ev) == '' ) EXIT
       data%n_ev_s = data%n_ev_s + 1
       data%id_env_s(data%n_ev_s) = aed_locate_sheet_global(sheet_environs(ev))
